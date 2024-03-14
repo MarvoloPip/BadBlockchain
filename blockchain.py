@@ -30,61 +30,71 @@ class blockchainCli(cmd.Cmd):
     def do_connect(self, line):
         """Usage: connect [port] \nConnect to node on port"""
         if self.node:
-            self.node.connect(self.default_host, int(line.split()[0]))
-            self.num_nodes += 1
+            for p in line.split():
+                self.node.connect(self.default_host, int(p))
+                self.num_nodes += 1
     
     def do_list(self, line):
         """List the blockchain"""
         print("blockchain : ", self.chain)
 
-    def do_add(self, line):
-        """Usage: add [from] [to] [amount]\nAdd transaction to blockchain"""
-        self.nextBlock = {"d": line, "y": 1, "n": 0}   
+    def do_send(self, line):
+        """Usage: send [to] [amount]\nSend [to] some $"""
+        data = ["0", self.node.port]
+        data.extend(line.split())
+        data.append(self.node.coins)
+        self.nextBlock = {"d": data[1:], "y": 1, "n": 0}   
         if self.node:
-            self.node.send_data("0 " + line + " " + str(self.node.coins))
+            self.node.send_data(" ".join(str(x) for x in data))
+            self.node.coins -= int(data[-1])
             time.sleep(10)
 
     def do_next(self, line): print(self.nextBlock)
 
+    """
+    TODO: change this function so that you are able to add invalid transactions
+    (don't overthink this read the comments)
+    """
     def check(self):
         while True:
             time.sleep(5)
             if self.node:
                 while self.node.latest != []:
-                    print(self.node.latest)
+                    # print(self.node.latest)
                     data = self.node.latest.pop().split()
                     if data[0] == "0":
-                        print("Requesting " + data + " to the blockchain")
-                        self.nextBlock = {"d": data[1], "y": 0, "n": 0}
-                        if (data[2] >= data[3]): 
-                            print("This transaction is invalid")
-                            self.no()
-                        else: self.yes()
+                        print(f"Requesting transaction {data[1:4]} to be added blockchain")
+                        print(f"{data[1]} has {data[4]} coins")
+                        self.nextBlock = {"d": data[1:], "y": 0, "n": 0}
+                        
+                        # if amount is greater than the number of coins 
+                        # the sender has, mark the transaction as invalid
+                        if (data[3] > data[4]): 
+                            print("This transaction is invalid. Voting No")
+                            self.no() # vote no
+                        else: 
+                            print("This transaction is valid. Voting Yes")
+                            self.yes() # vote yes
+
                     if data[0] == "1" and self.nextBlock:
                         if (data[1] == "y"): self.nextBlock["y"] += 1
                         else: self.nextBlock["n"] += 1
-                        self.n = {"d": data[1], "y": 0, "n": 0}
+                        self.n = {"d": data[1:], "y": 0, "n": 0}
                 if self.nextBlock:
                     if (self.nextBlock["y"] > self.nextBlock["n"]): 
-                        self.chain.append(self.nextBlock["d"])
+                        self.chain.append(self.nextBlock["d"][:-1])
                         self.nextBlock = None
                 
-    def yes(self, line):
+    def yes(self):
         if self.nextBlock:
             self.nextBlock["y"] += 1
             self.node.send_data("1 y")
     
-    def no(self, line):
+    def no(self):
         if self.nextBlock:
             self.nextBlock["n"] += 1 
             self.node.send_data("1 n")
 
-
-    # def do_check(self, line):
-    #     """Check for any pending additions to the chain"""
-    #     # print(self.node.latest)
-    #     if self.node.latest:
-    #         print("found pending")
 
     def do_hello(self, line):
         """Print a greeting."""
