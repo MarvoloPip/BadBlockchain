@@ -8,7 +8,6 @@ class Peer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connections = []
         self.latest = []
-        self.coins = 10
 
     def connect(self, peer_host, peer_port):
         connection = socket.create_connection((peer_host, peer_port))
