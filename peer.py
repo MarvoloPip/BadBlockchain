@@ -40,7 +40,7 @@ class Peer:
                 data = connection.recv(1024)
                 if not data:
                     break
-                self.latest.append(data.decode())
+                self.latest.insert(0, data.decode())
                 # print(f"Received data from {address}: {data.decode()}")
             except socket.error:
                 break

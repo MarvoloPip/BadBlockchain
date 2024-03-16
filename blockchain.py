@@ -68,12 +68,7 @@ class BadblockchainCli(cmd.Cmd):
     """
     def getBalance(self, user):
         balance = default_money
-        for block in self.chain:
-            if user == block[0]:
-                balance -= int(block[-1])
-            elif user == block[1]:
-                balance += int(block[-1])
-        return balance
+	pass 
 
     """
     Function that runs in the background checking for 
@@ -91,7 +86,7 @@ class BadblockchainCli(cmd.Cmd):
                         sender_amount = int(data[3])
                         sender_balance = self.getBalance(user)
                         print(f"{user} has {sender_balance} coins")
-                        self.nextBlock = {"d": data[1:], "y": 0, "n": 0}
+                        self.nextBlock = {"d": data[1:], "y": 1, "n": 0}
                         
                         # if amount is greater than the number of coins 
                         # the sender has, mark the transaction as invalid
