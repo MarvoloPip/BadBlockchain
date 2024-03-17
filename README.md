@@ -2,13 +2,11 @@
 
 A really bad blockchain client 
 
-***How to Run
-***
+**How to Run**
 
 ```python3 blockchain.py```
 
-***Commands List (can also type help in cli):
-***
+**Commands List (can also type help in cli):**
 
 ```
 init [port]
